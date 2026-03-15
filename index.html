@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEXT Prep — Matemáticas e Inglés</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0D0D0F;--surface:#161618;--card:#1C1C1F;--border:#2A2A2E;--text:#F0EFE9;--muted:#7A7A82;--math:#E8854A;--eng:#4A9EE8;--green:#4AE88A;--red:#E84A4A;--yellow:#E8D44A}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;min-height:100vh}
+nav{display:flex;align-items:center;padding:1.1rem 1.5rem;border-bottom:1px solid var(--border)}
+.logo{font-family:'Space Mono',monospace;font-size:14px;letter-spacing:.06em}
+.logo span{color:var(--math)}
+.nav-tag{font-size:11px;color:var(--muted);margin-left:10px}
+.screen{display:none;padding:1.25rem;max-width:460px;margin:0 auto}
+.screen.active{display:block}
+
+/* HOME */
+.home-title{font-size:24px;font-weight:600;line-height:1.2;margin:1.5rem 0 .4rem}
+.home-title em{font-style:normal;color:var(--math)}
+.home-sub{font-size:12px;color:var(--muted);margin-bottom:1.75rem;line-height:1.5}
+.slabel{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:.6rem}
+.subj-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1.5rem}
+.subj-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;cursor:pointer;text-align:left;transition:border-color .15s}
+.subj-card:hover{border-color:#3A3A3E}
+.subj-card.on{border-color:var(--math)}
+.subj-card.on.eng{border-color:var(--eng)}
+.s-ico{font-size:20px;margin-bottom:5px}
+.s-name{font-size:13px;font-weight:600;color:var(--text)}
+.s-desc{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.4}
+.s-pct{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-top:5px}
+.subj-card.on .s-pct{color:var(--math)}
+.subj-card.on.eng .s-pct{color:var(--eng)}
+.mode-list{display:flex;flex-direction:column;gap:7px;margin-bottom:1.5rem}
+.mode-row{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.85rem;cursor:pointer;transition:border-color .15s}
+.mode-row:hover{border-color:#3A3A3E}
+.mode-row.on{border-color:var(--math)}
+.m-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.m-name{font-size:13px;font-weight:500;color:var(--text)}
+.m-sub{font-size:11px;color:var(--muted)}
+.diff-row{display:flex;gap:7px;margin-bottom:1.5rem}
+.diff-btn{flex:1;padding:.55rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:'Space Mono',monospace;font-size:10px;cursor:pointer;text-align:center;transition:all .15s}
+.diff-btn.on{background:var(--math);border-color:var(--math);color:#fff}
+.btn-go{width:100%;background:var(--math);color:#fff;border:none;border-radius:10px;padding:.9rem;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .15s;letter-spacing:.02em}
+.btn-go:hover{opacity:.88}
+
+/* LOADING */
+#s-loading{text-align:center;padding-top:5rem}
+.spin{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--math);border-radius:50%;animation:sp .7s linear infinite;margin:0 auto 1rem}
+@keyframes sp{to{transform:rotate(360deg)}}
+.spin-txt{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted)}
+
+/* QUESTION */
+.q-header{display:flex;align-items:center;gap:8px;margin-bottom:1.25rem}
+.btn-back{background:transparent;border:1px solid var(--border);border-radius:8px;padding:.4rem .8rem;font-size:11px;color:var(--muted);cursor:pointer;font-family:'Sora',sans-serif;transition:all .12s}
+.btn-back:hover{border-color:#3A3A3E;color:var(--text)}
+.q-tag{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;padding:3px 10px;border-radius:20px;margin-left:auto}
+.q-tag.math{background:rgba(232,133,74,.12);color:var(--math);border:1px solid rgba(232,133,74,.25)}
+.q-tag.eng{background:rgba(74,158,232,.12);color:var(--eng);border:1px solid rgba(74,158,232,.25)}
+.progress{height:2px;background:var(--border);border-radius:1px;margin-bottom:1.25rem;overflow:hidden}
+.pfill{height:100%;background:var(--math);border-radius:1px;transition:width .35s}
+.pfill.eng{background:var(--eng)}
+.q-meta{display:flex;align-items:center;margin-bottom:1.25rem}
+.q-num{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted)}
+.timer{font-family:'Space Mono',monospace;font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--card);border:1px solid var(--border);color:var(--text);margin-left:auto}
+.timer.warn{color:var(--yellow);border-color:rgba(232,212,74,.35)}
+.timer.danger{color:var(--red);border-color:rgba(232,74,74,.35);animation:pulse .5s ease-in-out infinite alternate}
+@keyframes pulse{to{opacity:.5}}
+.topic-chip{display:inline-block;font-family:'Space Mono',monospace;font-size:10px;padding:3px 10px;border-radius:20px;background:var(--card);border:1px solid var(--border);color:var(--muted);margin-bottom:.75rem}
+.ctx{background:var(--card);border-left:2px solid var(--border);border-radius:0 8px 8px 0;padding:.85rem;font-size:12px;color:#9A9AA2;line-height:1.7;margin-bottom:1rem}
+.q-text{font-size:15px;font-weight:500;line-height:1.55;margin-bottom:1.25rem}
+.opts{display:flex;flex-direction:column;gap:7px;margin-bottom:1.25rem}
+.opt{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.8rem .9rem;cursor:pointer;font-size:13px;color:var(--text);text-align:left;display:flex;align-items:flex-start;gap:8px;font-family:'Sora',sans-serif;transition:all .1s}
+.opt:hover:not([disabled]){border-color:#3A3A3E;background:#202023}
+.opt .ltr{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);flex-shrink:0;margin-top:2px;font-weight:700}
+.opt.picked{border-color:var(--math)}
+.opt.picked.em{border-color:var(--eng)}
+.opt.ok{border-color:var(--green);background:rgba(74,232,138,.07);color:var(--green)}
+.opt.ok .ltr{color:var(--green)}
+.opt.bad{border-color:var(--red);background:rgba(232,74,74,.07);color:var(--red)}
+.opt.bad .ltr{color:var(--red)}
+.fill-in{width:100%;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.8rem .9rem;font-size:14px;color:var(--text);font-family:'Sora',sans-serif;outline:none;margin-bottom:10px;transition:border-color .15s}
+.fill-in:focus{border-color:var(--math)}
+.fill-in.ok{border-color:var(--green);background:rgba(74,232,138,.07);color:var(--green)}
+.fill-in.bad{border-color:var(--red);background:rgba(232,74,74,.07)}
+.hint{font-size:11px;color:var(--muted);padding:.5rem .75rem;background:var(--card);border-radius:7px;border:1px solid var(--border);margin-bottom:10px}
+.fb{border-radius:10px;padding:.85rem;font-size:12px;line-height:1.6;margin-bottom:10px}
+.fb.ok{background:rgba(74,232,138,.08);border:1px solid rgba(74,232,138,.2);color:#A8EFC4}
+.fb.bad{background:rgba(232,212,74,.07);border:1px solid rgba(232,212,74,.2);color:var(--yellow)}
+.fb strong{color:var(--text)}
+.btn-v{width:100%;background:var(--math);color:#fff;border:none;border-radius:10px;padding:.82rem;font-size:13px;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;transition:opacity .15s}
+.btn-v:hover{opacity:.88}
+.btn-v:disabled{opacity:.3;cursor:not-allowed}
+.btn-v.em{background:var(--eng)}
+.btn-nx{width:100%;background:transparent;border:1px solid var(--border);color:var(--text);border-radius:10px;padding:.78rem;font-size:13px;cursor:pointer;font-family:'Sora',sans-serif;margin-top:7px;transition:all .15s}
+.btn-nx:hover{border-color:#3A3A3E;background:var(--card)}
+
+/* RESULTS */
+.res-pct{font-family:'Space Mono',monospace;font-size:54px;font-weight:700;margin:1.25rem 0 .2rem}
+.res-pct.math{color:var(--math)}
+.res-pct.eng{color:var(--eng)}
+.res-sub{font-size:12px;color:var(--muted);margin-bottom:1.5rem}
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1.25rem}
+.res-stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.9rem}
+.rv{font-family:'Space Mono',monospace;font-size:20px;font-weight:700}
+.rl{font-size:10px;color:var(--muted);margin-top:3px}
+.res-msg{font-size:12px;color:#9A9AA2;line-height:1.6;padding:.9rem;background:var(--card);border-radius:10px;border:1px solid var(--border);margin-bottom:1.25rem}
+.btn-rep{width:100%;background:var(--math);color:#fff;border:none;border-radius:10px;padding:.82rem;font-size:13px;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;margin-bottom:7px;transition:opacity .15s}
+.btn-rep:hover{opacity:.88}
+.btn-rep.eng{background:var(--eng)}
+.btn-home{width:100%;background:transparent;border:1px solid var(--border);color:var(--text);border-radius:10px;padding:.78rem;font-size:13px;cursor:pointer;font-family:'Sora',sans-serif;transition:all .15s}
+.btn-home:hover{border-color:#3A3A3E;background:var(--card)}
+.err{background:rgba(232,74,74,.08);border:1px solid rgba(232,74,74,.2);border-radius:10px;padding:.85rem;font-size:12px;color:#F09595;margin-bottom:10px}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">MEXT<span>.</span>PREP</div>
+  <div class="nav-tag">Barranquilla → Japón 🎌</div>
+</nav>
+
+<!-- HOME -->
+<div id="s-home" class="screen active">
+  <p class="home-title">Practica para el<br><em>examen MEXT</em></p>
+  <p class="home-sub">Matemáticas (10%) e Inglés (25%) · Preguntas generadas por IA según el temario real</p>
+
+  <p class="slabel">Materia</p>
+  <div class="subj-grid">
+    <div class="subj-card on" id="sc-math" onclick="pickSubj('math')">
+      <div class="s-ico">📐</div>
+      <div class="s-name">Matemáticas</div>
+      <div class="s-desc">Álgebra · Funciones · Geometría · Estadística</div>
+      <div class="s-pct">10% del examen</div>
+    </div>
+    <div class="subj-card eng" id="sc-eng" onclick="pickSubj('english')">
+      <div class="s-ico">🌍</div>
+      <div class="s-name">Inglés</div>
+      <div class="s-desc">Gramática · Vocabulario · Comprensión · Corrección</div>
+      <div class="s-pct">25% del examen</div>
+    </div>
+  </div>
+
+  <p class="slabel">Modo</p>
+  <div class="mode-list">
+    <div class="mode-row on" id="mb-mc" onclick="pickMode('mc')">
+      <div class="m-ico" style="background:rgba(232,133,74,.12)">☑</div>
+      <div><div class="m-name">Opción múltiple</div><div class="m-sub">5 preguntas · 4 opciones · explicación inmediata</div></div>
+    </div>
+    <div class="mode-row" id="mb-fill" onclick="pickMode('fill')">
+      <div class="m-ico" style="background:rgba(74,158,232,.12)">✏</div>
+      <div><div class="m-name">Completar espacio</div><div class="m-sub">Escribe la respuesta correcta</div></div>
+    </div>
+    <div class="mode-row" id="mb-sim" onclick="pickMode('sim')">
+      <div class="m-ico" style="background:rgba(232,212,74,.12)">⏱</div>
+      <div><div class="m-name">Simulacro</div><div class="m-sub">10 preguntas · 90 seg c/u · puntaje final</div></div>
+    </div>
+  </div>
+
+  <p class="slabel">Fase de estudio</p>
+  <div class="diff-row">
+    <div class="diff-btn" id="dp-basic" onclick="pickDiff('basic')">FASE 1</div>
+    <div class="diff-btn on" id="dp-inter" onclick="pickDiff('inter')">FASE 2</div>
+    <div class="diff-btn" id="dp-adv" onclick="pickDiff('adv')">FASE 3</div>
+  </div>
+
+  <button class="btn-go" onclick="startSession()">Comenzar práctica →</button>
+</div>
+
+<!-- LOADING -->
+<div id="s-loading" class="screen">
+  <div class="spin"></div>
+  <div class="spin-txt">Generando preguntas con IA...</div>
+</div>
+
+<!-- QUESTION -->
+<div id="s-question" class="screen">
+  <div class="q-header">
+    <button class="btn-back" onclick="goHome()">← salir</button>
+    <span class="q-tag math" id="q-tag">MATH</span>
+  </div>
+  <div class="progress"><div class="pfill" id="q-prog" style="width:0%"></div></div>
+  <div class="q-meta">
+    <span class="q-num" id="q-num">01 / 05</span>
+    <span class="timer" id="q-timer" style="display:none">1:30</span>
+  </div>
+  <div id="q-err"></div>
+  <div id="q-body"></div>
+</div>
+
+<!-- RESULTS -->
+<div id="s-results" class="screen">
+  <p class="slabel" id="res-slabel">MATEMÁTICAS</p>
+  <div class="res-pct math" id="res-big">0%</div>
+  <p class="res-sub" id="res-title">Sesión completada</p>
+  <div class="res-grid">
+    <div class="res-stat"><div class="rv" id="r-score">0/0</div><div class="rl">Correctas</div></div>
+    <div class="res-stat"><div class="rv" id="r-streak">0</div><div class="rl">Racha máxima</div></div>
+    <div class="res-stat"><div class="rv" id="r-mode">—</div><div class="rl">Modo</div></div>
+    <div class="res-stat"><div class="rv" id="r-fase">—</div><div class="rl">Fase</div></div>
+  </div>
+  <div class="res-msg" id="r-msg"></div>
+  <button class="btn-rep" id="r-rep" onclick="startSession()">Repetir sesión →</button>
+  <button class="btn-home" onclick="goHome()">Cambiar configuración</button>
+</div>
+
+<script>
+var S={subj:'math',mode:'mc',diff:'inter'};
+var questions=[],curQ=0,score=0,streak=0,maxStreak=0;
+var timerInt=null,timeLeft=90,selOpt=null,answered=false;
+
+function show(id){['s-home','s-loading','s-question','s-results'].forEach(function(s){document.getElementById(s).classList.toggle('active',s===id);})}
+function pickSubj(s){S.subj=s;document.getElementById('sc-math').classList.toggle('on',s==='math');document.getElementById('sc-eng').classList.toggle('on',s==='english');}
+function pickMode(m){S.mode=m;['mc','fill','sim'].forEach(function(x){document.getElementById('mb-'+x).classList.toggle('on',x===m);});}
+function pickDiff(d){S.diff=d;['basic','inter','adv'].forEach(function(x){document.getElementById('dp-'+x).classList.toggle('on',x===d);});}
+function goHome(){clearInterval(timerInt);show('s-home');}
+
+function startSession(){
+  questions=[];curQ=0;score=0;streak=0;maxStreak=0;selOpt=null;answered=false;
+  show('s-loading');
+  fetch('/api/preguntas',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({subject:S.subj,mode:S.mode,difficulty:S.diff})
+  }).then(function(r){return r.json();}).then(function(data){
+    if(data.error)throw new Error(data.error);
+    questions=data.questions;
+    show('s-question');renderQ();
+  }).catch(function(e){
+    show('s-home');
+    alert('Error: '+e.message+'. Verifica que la API key esté configurada en Vercel.');
+  });
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function renderQ(){
+  clearInterval(timerInt);answered=false;selOpt=null;
+  if(curQ>=questions.length){showResults();return;}
+  var q=questions[curQ],total=questions.length,isMath=S.subj==='math';
+  document.getElementById('q-prog').style.width=Math.round((curQ/total)*100)+'%';
+  document.getElementById('q-prog').className='pfill'+(isMath?'':' eng');
+  document.getElementById('q-num').textContent=(curQ<9?'0':'')+(curQ+1)+' / '+(total<10?'0':'')+total;
+  var tag=document.getElementById('q-tag');
+  tag.textContent=isMath?'MATH':'ENGLISH';
+  tag.className='q-tag '+(isMath?'math':'eng');
+  document.getElementById('q-err').innerHTML='';
+
+  var html='';
+  if(q.context&&q.context.trim())html+='<div class="ctx">'+esc(q.context)+'</div>';
+  if(q.topic)html+='<div class="topic-chip">'+esc(q.topic)+'</div>';
+  html+='<div class="q-text">'+esc(q.question)+'</div>';
+
+  if(S.mode==='fill'){
+    html+='<input class="fill-in" id="fi" placeholder="Escribe tu respuesta..." autocomplete="off" />';
+    if(q.hint&&q.hint.trim())html+='<div class="hint">💡 '+esc(q.hint)+'</div>';
+    html+='<button class="btn-v'+(isMath?'':' em')+'" id="vb" onclick="checkFill()">Verificar</button>';
+    html+='<div id="fb"></div>';
+  } else {
+    html+='<div class="opts">';
+    ['A','B','C','D'].forEach(function(l){
+      html+='<button class="opt" id="o'+l+'" onclick="pickOpt(\''+l+'\')"><span class="ltr">'+l+'</span><span>'+esc((q.options&&q.options[l])||'')+'</span></button>';
+    });
+    html+='</div>';
+    html+='<button class="btn-v'+(isMath?'':' em')+'" id="vb" disabled onclick="checkMC()">Verificar</button>';
+    html+='<div id="fb"></div>';
+  }
+  document.getElementById('q-body').innerHTML=html;
+
+  if(S.mode==='sim'){
+    timeLeft=90;
+    var tel=document.getElementById('q-timer');tel.style.display='block';updTimer();
+    timerInt=setInterval(function(){timeLeft--;updTimer();if(timeLeft<=0){clearInterval(timerInt);autoTimeout();}},1000);
+  } else {
+    document.getElementById('q-timer').style.display='none';
+  }
+  if(S.mode==='fill'){
+    setTimeout(function(){
+      var el=document.getElementById('fi');
+      if(el){el.focus();el.addEventListener('keydown',function(e){if(e.key==='Enter')checkFill();});}
+    },50);
+  }
+}
+
+function updTimer(){
+  var el=document.getElementById('q-timer');if(!el)return;
+  var m=Math.floor(timeLeft/60),s=timeLeft%60;
+  el.textContent=m+':'+(s<10?'0':'')+s;
+  el.className='timer'+(timeLeft<=15?' danger':timeLeft<=30?' warn':'');
+}
+
+function pickOpt(l){
+  if(answered)return;
+  selOpt=l;
+  var isMath=S.subj==='math';
+  ['A','B','C','D'].forEach(function(x){
+    var el=document.getElementById('o'+x);
+    if(el)el.className='opt'+(x===l?' picked'+(isMath?'':' em'):'');
+  });
+  var vb=document.getElementById('vb');if(vb)vb.disabled=false;
+}
+
+function checkMC(){
+  if(!selOpt||answered)return;
+  answered=true;clearInterval(timerInt);
+  var q=questions[curQ],ok=selOpt===q.correct;
+  if(ok){score++;streak++;maxStreak=Math.max(maxStreak,streak);}else{streak=0;}
+  ['A','B','C','D'].forEach(function(l){
+    var el=document.getElementById('o'+l);if(!el)return;
+    el.disabled=true;
+    if(l===q.correct)el.className='opt ok';
+    else if(l===selOpt&&!ok)el.className='opt bad';
+    else el.className='opt';
+  });
+  var vb=document.getElementById('vb');if(vb)vb.disabled=true;
+  showFb(ok,ok?'Correcto':'Incorrecto — respuesta: <strong>'+esc(q.correct)+'</strong>',q.explanation);
+}
+
+function checkFill(){
+  if(answered)return;
+  var inp=document.getElementById('fi');if(!inp)return;
+  var ua=inp.value.trim().toLowerCase(),q=questions[curQ];
+  var ok=ua===String(q.blank_answer).toLowerCase().trim();
+  answered=true;clearInterval(timerInt);
+  if(ok){score++;streak++;maxStreak=Math.max(maxStreak,streak);}else{streak=0;}
+  inp.className='fill-in '+(ok?'ok':'bad');inp.disabled=true;
+  var vb=document.getElementById('vb');if(vb)vb.disabled=true;
+  showFb(ok,ok?'Correcto':'Incorrecto — respuesta: <strong>'+esc(String(q.blank_answer))+'</strong>',q.explanation);
+}
+
+function showFb(ok,title,expl){
+  var next=curQ+1<questions.length?'Siguiente →':'Ver resultados →';
+  document.getElementById('fb').innerHTML=
+    '<div class="fb '+(ok?'ok':'bad')+'">'+title+'. '+esc(expl)+'</div>'
+    +'<button class="btn-nx" onclick="nextQ()">'+next+'</button>';
+}
+
+function autoTimeout(){
+  if(answered)return;
+  answered=true;streak=0;
+  var q=questions[curQ];
+  if(S.mode==='fill'){
+    var inp=document.getElementById('fi');if(inp){inp.className='fill-in bad';inp.disabled=true;}
+    var vb=document.getElementById('vb');if(vb)vb.disabled=true;
+  } else {
+    if(selOpt){checkMC();return;}
+    ['A','B','C','D'].forEach(function(l){var el=document.getElementById('o'+l);if(el){el.disabled=true;if(l===q.correct)el.className='opt ok';}});
+    var vb=document.getElementById('vb');if(vb)vb.disabled=true;
+  }
+  var next=curQ+1<questions.length?'Siguiente →':'Ver resultados →';
+  document.getElementById('fb').innerHTML=
+    '<div class="fb bad">⏰ Tiempo agotado — respuesta: <strong>'+esc(String(q.blank_answer||q.correct))+'</strong>. '+esc(q.explanation)+'</div>'
+    +'<button class="btn-nx" onclick="nextQ()">'+next+'</button>';
+}
+
+function nextQ(){curQ++;renderQ();}
+
+function showResults(){
+  clearInterval(timerInt);show('s-results');
+  var pct=Math.round((score/questions.length)*100),isMath=S.subj==='math';
+  document.getElementById('res-slabel').textContent=isMath?'MATEMÁTICAS':'INGLÉS';
+  var big=document.getElementById('res-big');big.textContent=pct+'%';big.className='res-pct '+(isMath?'math':'eng');
+  document.getElementById('r-rep').className='btn-rep'+(isMath?'':' eng');
+  document.getElementById('r-score').textContent=score+'/'+questions.length;
+  document.getElementById('r-streak').textContent=maxStreak;
+  document.getElementById('r-mode').textContent={mc:'Múltiple',fill:'Completar',sim:'Simulacro'}[S.mode];
+  document.getElementById('r-fase').textContent={basic:'Fase 1',inter:'Fase 2',adv:'Fase 3'}[S.diff];
+  var msgs=['Repasa el material de tu fase antes de continuar.','Identificaste algunos temas a reforzar. ¡Sigue!','Buen dominio. Con más práctica estarás listo.','¡Nivel examen MEXT! Sigue así. 🎌'];
+  document.getElementById('res-title').textContent=pct>=90?'¡Excelente! 🎌':pct>=70?'¡Buen trabajo!':pct>=50?'Progresando':'Sigue practicando';
+  document.getElementById('r-msg').textContent=msgs[pct>=90?3:pct>=70?2:pct>=50?1:0];
+}
+</script>
+</body>
+</html>
